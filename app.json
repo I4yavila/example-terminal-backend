@@ -7,6 +7,10 @@
     "STRIPE_TEST_SECRET_KEY": {
       "description": "Find this at https://dashboard.stripe.com/account/apikeys (it'll look like sk_test_****)",
       "required": true
+    },
+    "STRIPE_SECRET_KEY": {
+      "description": "Find this at https://dashboard.stripe.com/account/apikeys (it'll look like sk_live_****)",
+      "required": true
     }
   }
 }
