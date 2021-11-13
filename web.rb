@@ -23,7 +23,7 @@ options "*" do
 end
 
 Dotenv.load
-Stripe.api_key = ENV['STRIPE_ENV'] == 'production' ? ENV['STRIPE_SECRET_KEY'] : ENV['STRIPE_TEST_SECRET_KEY']
+Stripe.api_key = ENV['STRIPE_SECRET_KEY'] 
 Stripe.api_version = '2020-03-02'
 
 def log_info(message)
@@ -36,28 +36,10 @@ get '/' do
   send_file 'index.html'
 end
 
-def validateApiKey
-  if Stripe.api_key.nil? || Stripe.api_key.empty?
-    return "Error: you provided an empty secret key. Please provide your test mode secret key. For more information, see https://stripe.com/docs/keys"
-  end
-  if Stripe.api_key.start_with?('pk')
-    return "Error: you used a publishable key to set up the example backend. Please use your test mode secret key. For more information, see https://stripe.com/docs/keys"
-  end
-  if Stripe.api_key.start_with?('sk_live')
-    return "Error: you used a live mode secret key to set up the example backend. Please use your test mode secret key. For more information, see https://stripe.com/docs/keys#test-live-modes"
-  end
-  return nil
-end
 
 # This endpoint registers a Verifone P400 reader to your Stripe account.
 # https://stripe.com/docs/terminal/readers/connecting/verifone-p400#register-reader
 post '/register_reader' do
-  validationError = validateApiKey
-  if !validationError.nil?
-    status 400
-    return log_info(validationError)
-  end
-
   begin
     reader = Stripe::Terminal::Reader.create(
       :registration_code => params[:registration_code],
@@ -85,12 +67,6 @@ end
 # https://stripe.com/docs/terminal/sdk/ios#connection-token
 # https://stripe.com/docs/terminal/sdk/android#connection-token
 post '/connection_token' do
-  validationError = validateApiKey
-  if !validationError.nil?
-    status 400
-    return log_info(validationError)
-  end
-
   begin
     token = Stripe::Terminal::ConnectionToken.create
   rescue Stripe::StripeError => e
@@ -106,12 +82,6 @@ end
 # This endpoint creates a PaymentIntent.
 # https://stripe.com/docs/terminal/payments#create
 post '/create_payment_intent' do
-  validationError = validateApiKey
-  if !validationError.nil?
-    status 400
-    return log_info(validationError)
-  end
-
   begin
     payment_intent = Stripe::PaymentIntent.create(
       :payment_method_types => params[:payment_method_types] || ['card_present'],
@@ -150,12 +120,6 @@ end
 # This endpoint creates a SetupIntent.
 # https://stripe.com/docs/api/setup_intents/create
 post '/create_setup_intent' do
-  validationError = validateApiKey
-  if !validationError.nil?
-    status 400
-    return log_info(validationError)
-  end
-
   begin
     setup_intent_params = {
       :payment_method_types => params[:payment_method_types] || ['card_present'],
@@ -234,12 +198,6 @@ end
 # you can efficiently fetch Locations as needed.
 # https://stripe.com/docs/api/terminal/locations
 get '/list_locations' do
-  validationError = validateApiKey
-  if !validationError.nil?
-    status 400
-    return log_info(validationError)
-  end
-
   begin
     locations = Stripe::Terminal::Location.list(
       limit: 100
@@ -259,12 +217,7 @@ end
 # This endpoint creates a Location.
 # https://stripe.com/docs/api/terminal/locations
 post '/create_location' do
-  validationError = validateApiKey
-  if !validationError.nil?
-    status 400
-    return log_info(validationError)
-  end
-  
+    
   begin
     location = Stripe::Terminal::Location.create(
       display_name: params[:display_name],
